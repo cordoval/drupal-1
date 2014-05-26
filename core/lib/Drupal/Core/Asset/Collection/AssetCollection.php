@@ -13,24 +13,22 @@ use Drupal\Core\Asset\AssetInterface;
 use Drupal\Core\Asset\AssetLibraryRepository;
 use Drupal\Core\Asset\Collection\Iterator\AssetSubtypeFilterIterator;
 use Drupal\Core\Asset\DependencyInterface;
-use Drupal\Core\Asset\Exception\FrozenObjectException;
-use Drupal\Core\Asset\Exception\UnsupportedAsseticBehaviorException;
+use Frozone\FreezableTrait;
 
 /**
  * A container for assets.
  *
  * TODO js settings...
- *
- * TODO With PHP5.4, refactor out AssetCollectionBasicInterface into a trait.
  */
-class AssetCollection extends BasicAssetCollection implements AssetCollectionInterface {
-
-  /**
-   * State flag indicating whether or not this collection is frozen.
-   *
-   * @var bool
-   */
-  protected $frozen = FALSE;
+class AssetCollection implements \IteratorAggregate, AssetCollectionInterface {
+  use FreezableTrait;
+  use BasicCollectionTrait {
+    // Aliases for write methods that must be wrapped in a freeze check
+    add as _add;
+    remove as _remove;
+    replace as _replace;
+    _bcinit as public __construct;
+  }
 
   /**
    * The list of unresolved library keys attached directly to this collection.
@@ -47,7 +45,7 @@ class AssetCollection extends BasicAssetCollection implements AssetCollectionInt
    */
   public function add(AsseticAssetInterface $asset) {
     $this->attemptWrite(__METHOD__);
-    return parent::add($asset);
+    return $this->_add($asset);
   }
 
   /**
@@ -79,7 +77,7 @@ class AssetCollection extends BasicAssetCollection implements AssetCollectionInt
    */
   public function remove($needle, $graceful = FALSE) {
     $this->attemptWrite(__METHOD__);
-    return parent::remove($needle, $graceful);
+    return $this->_remove($needle, $graceful);
   }
 
   /**
@@ -87,23 +85,7 @@ class AssetCollection extends BasicAssetCollection implements AssetCollectionInt
    */
   public function replace($needle, AssetInterface $replacement, $graceful = FALSE) {
     $this->attemptWrite(__METHOD__);
-    return parent::replace($needle, $replacement, $graceful);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function freeze() {
-    $this->frozen = TRUE;
-
-    return $this;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function isFrozen() {
-    return $this->frozen;
+    return $this->_replace($needle, $replacement, $graceful);
   }
 
   /**
@@ -231,19 +213,4 @@ class AssetCollection extends BasicAssetCollection implements AssetCollectionInt
 
     return $this;
   }
-
-  /**
-   * Checks if the asset collection is frozen, throws an exception if it is.
-   *
-   * @param string $method
-   *   The name of the method that was originally called.
-   *
-   * @throws FrozenObjectException
-   */
-  protected function attemptWrite($method) {
-    if ($this->isFrozen()) {
-      throw new FrozenObjectException(sprintf('AssetCollectionInterface::%s was called; writes cannot be performed on a frozen collection.', $method));
-    }
-  }
-
 }

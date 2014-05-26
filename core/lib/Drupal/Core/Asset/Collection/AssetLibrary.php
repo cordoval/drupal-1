@@ -10,8 +10,8 @@ namespace Drupal\Core\Asset\Collection;
 use Drupal\Core\Asset\AssetInterface;
 use Drupal\Core\Asset\DependencyInterface;
 use Drupal\Core\Asset\Collection\AssetCollection;
-use Drupal\Core\Asset\Exception\FrozenObjectException;
-use Drupal\Core\Asset\RelativePositionInterface;
+use Drupal\Component\ObjectState\FrozenObjectException;
+use Drupal\Core\Asset\DependencyTrait;
 
 /**
  * An asset library is a named collection of assets.
@@ -20,6 +20,9 @@ use Drupal\Core\Asset\RelativePositionInterface;
  * other assets (including assets declared by other libraries).
  */
 class AssetLibrary extends AssetCollection implements DependencyInterface {
+  use DependencyTrait {
+    addDependency as _addDependency;
+  }
 
   /**
    * The asset library's title.
@@ -41,27 +44,6 @@ class AssetLibrary extends AssetCollection implements DependencyInterface {
    * @var string
    */
   protected $website = '';
-
-  /**
-   * The asset library's dependencies (on other asset libraries).
-   *
-   * @var array
-   */
-  protected $dependencies = array();
-
-  /**
-   * The asset library's predecing assets (not asset libraries!).
-   *
-   * @var array
-   */
-  protected $predecessors = array();
-
-  /**
-   * The asset library's succeeding assets (not asset libraries!).
-   *
-   * @var array
-   */
-  protected $successors = array();
 
   /**
    * Set the asset library's title.
@@ -143,27 +125,7 @@ class AssetLibrary extends AssetCollection implements DependencyInterface {
    */
   public function addDependency($key) {
     $this->attemptWrite(__METHOD__);
-    if (!is_string($key) || substr_count($key, '/') !== 1) {
-      throw new \InvalidArgumentException('Dependencies must be expressed as a string key identifying the depended-upon library.');
-    }
-
-    // The library key is stored as the key for cheap deduping.
-    $this->dependencies[$key] = TRUE;
-    return $this;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function hasDependencies() {
-    return !empty($this->dependencies);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getDependencyInfo() {
-    return array_keys($this->dependencies);
+    return $this->_addDependency($key);
   }
 
   /**
@@ -173,14 +135,5 @@ class AssetLibrary extends AssetCollection implements DependencyInterface {
     $this->attemptWrite(__METHOD__);
     $this->dependencies = array();
     return $this;
-  }
-
-  /**
-   * Checks if the asset library is frozen, throws an exception if it is.
-   */
-  protected function attemptWrite($method) {
-    if ($this->isFrozen()) {
-      throw new FrozenObjectException('Metadata cannot be modified on a frozen AssetLibrary.');
-    }
   }
 }

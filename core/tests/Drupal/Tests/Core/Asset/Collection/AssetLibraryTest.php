@@ -7,7 +7,7 @@
 namespace Drupal\Tests\Core\Asset\Collection;
 
 use Drupal\Core\Asset\Collection\AssetLibrary;
-use Drupal\Core\Asset\Exception\FrozenObjectException;
+use Frozone\FrozenObjectException;
 use Drupal\Tests\Core\Asset\AssetUnitTest;
 
 /**
@@ -71,31 +71,6 @@ class AssetLibraryTest extends AssetUnitTest {
 
   /**
    * @depends testAddDependency
-   * @covers ::hasDependencies
-   */
-  public function testHasDependencies() {
-    $library = $this->getLibraryFixture();
-    $this->assertFalse($library->hasDependencies());
-
-    $library->addDependency('foo/bar');
-    $this->assertTrue($library->hasDependencies());
-  }
-
-  /**
-   * @depends testAddDependency
-   * @covers ::getDependencyInfo
-   */
-  public function testGetDependencyInfo() {
-    $library = $this->getLibraryFixture();
-    $this->assertEmpty($library->getDependencyInfo());
-
-    $library->addDependency('foo/bar');
-    $this->assertEquals(array('foo/bar'), $library->getDependencyInfo());
-  }
-
-  /**
-   * @depends testAddDependency
-   * @depends testHasDependencies
    * @covers ::clearDependencies
    */
   public function testClearDependencies() {

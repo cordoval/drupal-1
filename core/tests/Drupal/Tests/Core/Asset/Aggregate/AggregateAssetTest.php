@@ -7,11 +7,11 @@
 
 namespace Drupal\Tests\Core\Asset\Aggregate;
 
-use Drupal\Core\Asset\Collection\AssetCollectionBasicInterface;
+use Drupal\Core\Asset\Collection\BasicCollectionInterface;
 use Drupal\Core\Asset\Exception\AssetTypeMismatchException;
 use Drupal\Core\Asset\Exception\UnsupportedAsseticBehaviorException;
 use Drupal\Tests\Core\Asset\AssetUnitTest;
-use Drupal\Tests\Core\Asset\Collection\BasicAssetCollectionTest;
+use Drupal\Tests\Core\Asset\Collection\BasicCollectionTraitTest;
 
 /**
  * @coversDefaultClass \Drupal\Core\Asset\Aggregate\AggregateAsset
@@ -49,7 +49,7 @@ class AggregateAssetTest extends AssetUnitTest {
   /**
    * Returns an AggregateAsset, the base collection type for this unit test.
    *
-   * @return AssetCollectionBasicInterface
+   * @return BasicCollectionInterface
    */
   public function getCollection() {
     return $this->getAggregate();
@@ -299,27 +299,6 @@ class AggregateAssetTest extends AssetUnitTest {
    */
   public function testDump() {
     $this->fail();
-  }
-
-  /**
-   * @expectedException \Drupal\Core\Asset\Exception\UnsupportedAsseticBehaviorException
-   */
-  public function testGetVars() {
-    $this->getAggregate()->getVars();
-  }
-
-  /**
-   * @expectedException \Drupal\Core\Asset\Exception\UnsupportedAsseticBehaviorException
-   */
-  public function testSetValues() {
-    $this->getAggregate()->setValues(array());
-  }
-
-  /**
-   * @expectedException \Drupal\Core\Asset\Exception\UnsupportedAsseticBehaviorException
-   */
-  public function testGetValues() {
-    $this->getAggregate()->getValues();
   }
 }
 
